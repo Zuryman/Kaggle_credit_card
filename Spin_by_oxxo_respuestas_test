@@ -1,0 +1,22 @@
+La prueba consiste en tomar el kernel proporcionado y adaptarlo a un DAG, no hace falta implementar un nuevo proceso o evaluar la eficacia de
+predicción del mismo o hacer ajustes en el modelo.
+1.- Se considerará principalmente como es que el candidato ataca el problema de dividir eficientemente las tareas dentro del DAG de Airflow creado.
+- La versión de Airflow a usar queda a consideración del candidato.
+- El primer paso del DAG debe leer la información.
+- El último paso del DAG debe escribir un dataframe en formato parquet con la clasificación completa del dataset de la misma forma que describe el kernel.
+ En esta parte, descargue el dataset desde kaggle, este proceso se lleva a cabo diario (DAG) cada archivo se carga agregando al nombre de archivo
+ la fecha de descarga ej.- german_credit_data_12052023.csv este archivo se descarga en la carpeta raw_data
+2.- Bonus: ¿Podrías hacer que el DAG escriba el archivo final en AWS S3 o que ingeste directo en una base de datos?
+ El archivo una vez que se descarga, lo subo directamente a un Bucket de AWS, en el flujo del proyecto tambien subo el archivo a una base de datos en postgreSQL (PLUS),
+ Asi que en la base de datos, podemos utilizar algunas tecnicas para agilizar su acceso y consultas, por ejemplo, podemos utilizar el particionamiento, indices, en el caso de 
+ Snowflake esto se lleva a cabo  creando clusters de la tabla o tablas; asi se optimiza el acceso a los datos.; en el caso de Postgress otra alterniva seria crear vistas
+ Materializadas; asi las consultas serian mas rapidas.
+3.- Analizando el contenido del data frame, asume que este proceso será replicado n número de veces. ¿sería mejor considerar guardarlo en una base
+de datos en lugar parquets? ¿que propondrías para poder consultar millones de resultados asumiendo que este proceso los generaría? ¿Se te ocurre
+alguna solución mejor a guardarlo en una base de datos?.
+ La propuesta es utilizar herramientas de Big Data, como lo propopongo aqui: utilizar archivos no estructurados (parquet) usar de  AWS Elastic Map Reduce (EMR), Hadoop (HDFS)
+ y finalmente para procesamiento es utilizar Spark, este proyecto esta configurado con un nodo maestro y dos nodos exclavos, pero esta configurado para agregar mas nodos (es escalable)
+4- El aspecto principal a evaluar será el patrón de diseño en el DAG.- La prueba no debería tardar más de una semana en desarrollarse.
+- La elección de cómo presentar el proyecto (Repo Git, zip via mail, etc.) queda a consideración del candidato.
+5.- Para garantizar la calidad de los datos y haciendo uso de tu sentido de Data
+Steward propón una estrategía de Data Governance considerando Diccionarios de Datos y generando el propio del ejercicio a realizar
