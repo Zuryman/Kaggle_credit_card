@@ -11,7 +11,7 @@ El código basado en python analizar un núcleo compuesto de crédito de datos, 
 
 1. [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 2. [Cuenta AWS](https://aws.amazon.com/de/) para ejecutar el pipeline en el entorno de la nube
-3. Base de datos - En este proyecto, [PostgreSQL](https://aws.amazon.com/de/rds/postgresql/what-is-postgresql/) 
+3. Base de datos - para este proyecto, [PostgreSQL](https://aws.amazon.com/de/rds/postgresql/what-is-postgresql/) 
 &emsp;
 ## 0. Configuración del entorno de nube en AWS
 
