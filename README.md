@@ -3,9 +3,9 @@ Repositorio para proyecto de tarjetas de credito
 # ------------------------------------------------------------------------------
 Pipeline creado con Apache Spark (PySpark) y Apache Airflow en ambiente de Amazon (AWS)
 Este REPO muestra el desarrollo de un Pipeline escalable en AWS, utilizando tecnicas de procesos paralelos en Apache spark
-El analysis consiste en un analisis simple utilizando Pandas y Pylot.
+Consiste en un analisis simple utilizando Pandas y Pylot y Spark para el training.
 
-El código basado en python analizar un núcleo compuesto de crédito de datos, este conjunto de datos se descarga de kaggle
+El código esta basado en python el analisis es un kernell compuesto de  datos de tarjetas de credito, este conjunto de datos se descarga de kaggle
 
 ## Requisitos previos
 
@@ -20,10 +20,10 @@ AWS proporciona [Amazon Managed Workflows for Apache Airflow (MWAA)](https://aws
 1. Vaya a la [consola MWAA](https://console.aws.amazon.com/mwaa/home)  y "crear un nuevo entorno", despues seguir con la guia de  configuración paso a paso
 2. Selecciona un [S3 bucket](https://s3.console.aws.amazon.com/) existente o crear uno nuevo, define la ruta desde la que se cargará el DAG de Airflow, el nombre del bucket debe empezar por "airflow".
 3. Sube "requirements.txt" que contiene librerías de python para ejecutar el DAG, AWS las instalará a través de "pip install". 
-4. Para simplificar,  creamos una "red pública" que nos permite iniciar sesión a través de Internet, despues, dejamos que MWAA cree un nuevo "grupo de seguridad".
-5. Para la clase de entorno, seleccionamos 'pw1.small' ya que se corresponde mejor con nuestra carga de trabajo DAG
+4. Para simplificar,  hay que crear "red pública" que nos permite iniciar sesión a través de Internet, despues, dejamos que MWAA cree un nuevo "grupo de seguridad".
+5. Para la clase de entorno, seleccionamos 'pw1.small' ya que se corresponde mejor con la carga de trabajo DAG
 6. Activamos 'Airflow task logs' utilizando la configuración por defecto, esto permite tener información de registro que es especialmente útil para la depuración.
-7. Crear un 'nuevo rol' o usar uno existente y complete la configuración haciendo clic en 'crear nuevo entorno'.
+7. Crear un 'nuevo rol' o usar uno existente, hay que continuar con la configuración y al final clic en 'crear nuevo entorno'.
 &emsp;
 ## 1a. Variables y conexiones para el entorno MWAA
 MWAA proporciona variables para almacenar y recuperar contenido y configuraciones como  (clave-valor) dentro de Airflow. (JSON file)
@@ -157,11 +157,11 @@ Cambia IAM_policy_configuration.json) a la siguiente configuración para permiti
 La API de Spark, es fácil de usar para los desarrolladores, reduce gran parte del trabajo pesado de la computación distribuida y se puede acceder a ella en varios lenguajes. En este caso [PySpark](https://pypi.org/project/pyspark/), que es una API de Python para interactuar con Spark a alto nivel. Esto significa que es adecuado para interactuar con un clúster existente, pero no contiene herramientas para configurar un nuevo clúster independiente.  
 La lógica de paralelización de una arquitectura distribuida es el principal motor para acelerar el procesamiento y, por tanto, permitir la escalabilidad. El uso de DataFrame o Resilient Distributed Dataset (RDD) de Spark permite distribuir el cálculo de datos en un clúster.
 
-Se utilizo  la plataforma de big data de Amazon [EMR](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html) para ejecutar este clúster Spark. Un clúster Spark puede caracterizarse por un nodo maestro que actúa como coordinador central y nodos trabajadores en los que se ejecutan las tareas/trabajos (=paralelización). Requiere una capa de almacenamiento distribuido que este caso es [HDFS](https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html) (Hadoop Distributed File System). El almacenamiento de objetos S3 se utiliza como nuestro almacenamiento de datos principal y HDFS como memoria temporal intermedia en la que el script accederá a los datos del deataset y escribirá los resultados. Temporal significa que los datos procesados en HDFS. La razón para utilizar HDFS es que es más rápido que escribir los resultados directamente en el cubo de S3.  
+Se utilizo  la plataforma de big data de Amazon [EMR](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html) para ejecutar este clúster Spark. Un clúster Spark puede caracterizarse por un nodo maestro que actúa como coordinador central y nodos trabajadores en los que se ejecutan las tareas/trabajos (=paralelización). Requiere una capa de almacenamiento distribuido que este caso es [HDFS](https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html) (Hadoop Distributed File System). El almacenamiento de objetos S3 se utiliza como nuestro almacenamiento de datos principal y HDFS como memoria temporal intermedia en la que el script accederá a los datos del deataset y escribirá los resultados, los datos son procesados en HDFS. La razón para utilizar HDFS es que es más rápido que escribir los resultados directamente en el cubo de S3.  
 
 **Interacción entre Airflow y Amazon EMR**
 
-Cada paso que se dará en el clúste, sera ejecutado por el DAG Airflow:
+Cada paso que se dará en el clúster, sera ejecutado por el DAG Airflow:
 1.- Crear el clúster Spark proporcionando detalles de configuración específicos
 2.- Ejecutar Hadoop para el almacenamiento de datos distribuidos simultáneamente.
 3.- En cuanto a la configuración del clúster, utilizamos un nodo maestro y dos nodos de trabajo que se ejecutan en una [instancia] m5.xlarge (https://aws.amazon.com/de/ec2/instance-types/) (32 GB de RAM, 4 núcleos de CPU) dado el tamaño relativamente pequeño del conjunto de datos.
@@ -241,7 +241,7 @@ create_emr_cluster = EmrCreateJobFlowOperator(
 
 **Envío de trabajos Spark**
 
-El proceso de Spark  contiene el archivo python para el análisis y transformaciones  del dataset (curation_step.py), así como los pasos de movimiento de datos. La configuración `s3-dist-cp` permite transferir datos dentro de S3, o entre HDFS y S3. El archivo python se carga desde el bucket de S3, mientras el dataset se mueve desde el bucket de S3 al HDFS para el data curated y viceversa.Se añadio un sensor que comprobará periódicamente si el último paso se ha completado, omitido o finalizado. Después de que el sensor de pasos identifique la finalización curatio_step (por ejemplo, mover los datos finales de HDFS al bucket S3), se añade un paso final para terminar el clúster. El último paso es necesario ya que AWS opera en un modelo de pago por uso (EMR normalmente se factura por segundo) y dejar recursos innecesarios en ejecución es un desperdicio de todos modos.
+El proceso de Spark  contiene el archivo python para el análisis y transformaciones  del dataset (curation_step.py), así como los pasos de movimiento de datos. La configuración `s3-dist-cp` permite transferir datos dentro de S3, o entre HDFS y S3. El archivo python se carga desde el bucket de S3, mientras el dataset se mueve desde el bucket de S3 al HDFS para el data curated y viceversa.Se añadio un sensor que comprobará periódicamente si el último paso se ha completado, omitido o finalizado. Después de que el sensor de pasos identifique la finalización de curation_step (por ejemplo, mover los datos finales de HDFS al bucket S3), se añade un paso final para terminar el clúster. El último paso es necesario ya que AWS opera en un modelo de pago por uso (EMR normalmente se factura por segundo) y dejar recursos innecesarios en ejecución es un desperdicio de todos modos.
 
 ```Python
 # code snippet of curation_step.py
@@ -313,4 +313,4 @@ step_adder = EmrAddStepsOperator(
 
 ## 4. Iniciar Airflow DAG
 
-Cargue el DAG final de Airflow en la ruta correspondiente como se explica en la guía de configuración del entorno MWAA. Vaya a la interfaz de usuario de Airflow e inicie el DAG cambiando el botón a ON  o bine utiliza una fecha en el pasado para activar el DAG inmediatamente. 
+Cargue el DAG final de Airflow en la ruta correspondiente como se explica en la guía de configuración del entorno MWAA. Vaya a la interfaz de usuario de Airflow e inicie el DAG cambiando el botón a ON  o utiliza una fecha en el pasado para activar el DAG inmediatamente. 
