@@ -69,7 +69,9 @@ dag = DAG('credit_card_analysis',
 ```
 &emsp;
 ## 2. Tasks en el Airflow DAG
+
 **Arquitectura básica  
+
  Las tareas de ML se ejecutan a través de [Amazon SageMaker](https://aws.amazon.com/de/sagemaker/), mientras que los análisis de datos complejos pueden realizarse de forma distribuida en [Amazon EMR](https://aws.amazon.com/de/emr/). En este REPO, se ejecuta el análisis de datos en un clúster de Amazon EMR utilizando [Apache Spark](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark.html) (a través de Python API PySpark).
 Podemos escribir funciones personalizadas (por ejemplo, solicitar datos) o podemos hacer uso de módulos predefinidos que suelen estar ahí para desencadenar actividades externas (por ejemplo, análisis de datos en Spark en Amazon EMR).
 Ejemplo de una función personalizada que luego se asigna a un 'PythonOperator' para funcionar como una tarea:
