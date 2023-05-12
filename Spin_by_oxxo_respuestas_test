@@ -19,4 +19,16 @@ alguna solución mejor a guardarlo en una base de datos?.
 4- El aspecto principal a evaluar será el patrón de diseño en el DAG.- La prueba no debería tardar más de una semana en desarrollarse.
 - La elección de cómo presentar el proyecto (Repo Git, zip via mail, etc.) queda a consideración del candidato.
 5.- Para garantizar la calidad de los datos y haciendo uso de tu sentido de Data
-Steward propón una estrategía de Data Governance considerando Diccionarios de Datos y generando el propio del ejercicio a realizar
+Steward propón una estrategía de Data Governance considerando Diccionarios de Datos y generando el propio del ejercicio a realizar.
+Respecto al diccionario de datos, lo que hice fue agregar una tabla en Postgress, que toma datos del archivo como:
+id_batch: consecutivo de archivo que se descargo
+timestamp: la fecha de descarga
+step_airflow: un registros que se relaciona al proceso llevado a cabo, si el archivo ya fue procesado o se curo
+source :  aqui se puede guardar el path fuente de donde se descargo
+destination: la carpeta destino donde se guardara
+
+alternativamente:
+agregar  otros datos : como los datos del  co-worker que trabajo con el analisis de un archivo,  IP, fecha, nombre, usuario etc..
+La idea es registrar todas las fases del flujo del archivo dentro del pipeline; es decir desde que llega a la carpeta raw_data, pasando por
+ analisis, limpieza, validacion,hasta  la fase final que es el training.
+por cada fase es  generar datos de cada proceso y la metadata  generada: datos de clusters de spark, datos del co-worker, fase de proceso, fecha, IP
