@@ -1,0 +1,12 @@
+{
+    "credit_card_analysis": {
+        "bucket_name": "credit_card_analysis",
+        "key1": "input/credit_card.csv",
+        "output_key": "output/results.parquet",
+        "db_name": "postgres",
+        "consumer_key": "{{KAGGLE KEY}}",
+        "consumer_secret": "{{KAGGLE SECRET}}",
+        "access_token": "{{KAGGLE ACCESS TOKEN}}",
+        "access_token_secret": "{{{KAGGLE ACCESS TOKEN}}"
+         }
+}
