@@ -149,3 +149,25 @@ Cambia IAM_policy_configuration.json) a la siguiente configuración para permiti
 }
 ```
 &emsp;
+**Motivación para utilizar Spark para el análisis de datos**
+
+La API de Spark, es fácil de usar para los desarrolladores, reduce gran parte del trabajo pesado de la computación distribuida y se puede acceder a ella en varios lenguajes. En este caso [PySpark](https://pypi.org/project/pyspark/), que es una API de Python para interactuar con Spark a alto nivel. Esto significa que es adecuado para interactuar con un clúster existente, pero no contiene herramientas para configurar un nuevo clúster independiente.  
+La lógica de paralelización de una arquitectura distribuida es el principal motor para acelerar el procesamiento y, por tanto, permitir la escalabilidad. El uso de DataFrame o Resilient Distributed Dataset (RDD) de Spark permite distribuir el cálculo de datos en un clúster.
+
+Se utilizo  la plataforma de big data de Amazon [EMR](https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-what-is-emr.html) para ejecutar este clúster Spark. Un clúster Spark puede caracterizarse por un nodo maestro que actúa como coordinador central y nodos trabajadores en los que se ejecutan las tareas/trabajos (=paralelización). Requiere una capa de almacenamiento distribuido que este caso es [HDFS](https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html) (Hadoop Distributed File System). El almacenamiento de objetos S3 se utiliza como nuestro almacenamiento de datos principal y HDFS como memoria temporal intermedia en la que el script accederá a los datos del deataset y escribirá los resultados. Temporal significa que los datos procesados en HDFS. La razón para utilizar HDFS es que es más rápido que escribir los resultados directamente en el cubo de S3.  
+
+**Interacción entre Airflow y Amazon EMR**
+
+Cada paso que se dará en el clúste, sera ejecutado por el DAG Airflow:
+1.- Crear el clúster Spark proporcionando detalles de configuración específicos
+2.- Ejecutar Hadoop para el almacenamiento de datos distribuidos simultáneamente.
+3.- En cuanto a la configuración del clúster, utilizamos un nodo maestro y dos nodos de trabajo que se ejecutan en una [instancia] m5.xlarge (https://aws.amazon.com/de/ec2/instance-types/) (32 GB de RAM, 4 núcleos de CPU) dado el tamaño relativamente pequeño del conjunto de datos.
+4.- Se activa y ejectuar Bootstrap para instalar bibliotecas python no estándar
+```Python
+     sudo pip3 install pandas-profiling
+     sudo pip3 install psycopg2-binary
+     sudo pip3 install plotly
+     sudo pip3 install numpy
+     sudo pip3 sklearn
+     sudo pip3 xhboost
+```
