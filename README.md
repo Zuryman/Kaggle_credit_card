@@ -43,7 +43,7 @@ MWAA proporciona variables para almacenar y recuperar contenido y configuracione
 
 ```
 En el repositorio se proporciona un [archivo de variables] de ejemplo : "airflow_variables.json" que contiene todas las variables utilizadas en este proyecto.
-Airflow también permite definir objetos de conexión. En este vaso, necesitamos una conexión con 'AWS' (Airflow actúa como un sistema externo a AWS) y con la 'base de datos' en la que se almacenarán los resultados finales.
+Airflow también permite definir objetos de conexión. En este caso, necesitamos una conexión con 'AWS' (Airflow actúa como un sistema externo a AWS) y con la 'base de datos' en la que se almacenarán los resultados finales.
 &emsp;
 ## 1b. Configuración general en el DAG de Airflow
 Se define la información básica de configuración, como 'schedule_interval' o 'start_date' en la sección 'default_args' y dag del DAG. 
