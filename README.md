@@ -228,3 +228,13 @@ JOB_FLOW_OVERRIDES = {
     "JobFlowRole": "EMR_EC2_DefaultRole",
     "ServiceRole": "EMR_DefaultRole",
 }
+# Airflow task
+create_emr_cluster = EmrCreateJobFlowOperator(
+    task_id="create_emr_cluster",
+    job_flow_overrides=JOB_FLOW_OVERRIDES, # 
+    aws_conn_id="aws_default_christopherkindl",
+    emr_conn_id="emr_default_christopherkindl",
+    dag=dag,
+)
+
+```
