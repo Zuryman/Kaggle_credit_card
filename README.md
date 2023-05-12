@@ -1,5 +1,5 @@
 # Kaggle_credit_card
-This is a repo related to a Kaggle Credit Card Dataset Analysis
+Repositorio para proyecto de tarjetas de credito
 # ------------------------------------------------------------------------------
 Pipeline creado con Apache Spark (PySpark) y Apache Airflow en ambiente de Amazon (AWS)
 Este REPO muestra el desarrollo de un Pipeline escalable en AWS, utilizando tecnicas de procesos paralelos en Apache spark
