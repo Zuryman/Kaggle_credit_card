@@ -1,6 +1,6 @@
 # Kaggle_credit_card
 This is a repo related to a Kaggle Credit Card Dataset Analysis
-# ------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 Pipeline creado con Apache Spark (PySpark) y Apache Airflow en ambiente de Amazon (AWS)
 Este REPO muestra el desarrollo de un Pipeline escalable en AWS, utilizando tecnicas de procesos paralelos en Apache spark
 El analysis consiste en un analisis simple utilizando Pandas y Pylot.
@@ -70,7 +70,7 @@ dag = DAG('credit_card_analysis',
 &emsp;
 ## 2. Tasks en el Airflow DAG
 
-**Arquitectura básica  
+**Arquitectura básica**  
 
  Las tareas de ML se ejecutan a través de [Amazon SageMaker](https://aws.amazon.com/de/sagemaker/), mientras que los análisis de datos complejos pueden realizarse de forma distribuida en [Amazon EMR](https://aws.amazon.com/de/emr/). En este REPO, se ejecuta el análisis de datos en un clúster de Amazon EMR utilizando [Apache Spark](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark.html) (a través de Python API PySpark).
 Podemos escribir funciones personalizadas (por ejemplo, solicitar datos) o podemos hacer uso de módulos predefinidos que suelen estar ahí para desencadenar actividades externas (por ejemplo, análisis de datos en Spark en Amazon EMR).
@@ -124,7 +124,8 @@ create_schema = PythonOperator(
 ```
 &emsp;
 ## 3. Ejecutar Spark en Amazon EMR
-**Permisos  
+**Permisos**
+
 Cambia IAM_policy_configuration.json) a la siguiente configuración para permitir que MWAA interactúe con Amazon EMR. 
 ```JSON
 {
@@ -173,3 +174,57 @@ Cada paso que se dará en el clúste, sera ejecutado por el DAG Airflow:
      sudo pip3 sklearn
      sudo pip3 xhboost
 ```
+Airflow ofrece módulos predefinidos para interactuar rápidamente con Amazon EMR. El siguiente ejemplo muestra cómo se crea un clúster de Amazon EMR con Spark (PySpark) y una aplicación Hadoop mediante 'EmrCreateJobFlowOperator()'.
+
+
+JOB_FLOW_OVERRIDES = {
+    "Name": "credit_card_analysis",
+    "ReleaseLabel": "emr-5.33.0",
+    "LogUri": "s3n://credit_card_analysis/logs/",
+    "BootstrapActions": [
+        {'Name': 'install python libraries',
+                'ScriptBootstrapAction': {
+                'Path': 's3://credit_card_analysis/scripts/python-libraries.sh'}
+                            }
+                        ],
+    "Applications": [{"Name": "Hadoop"}, {"Name": "Spark"}], # El cluster EMR debe tener HDFS y Spark
+    "Configurations": [
+        {
+            "Classification": "spark-env",
+            "Configurations": [
+                {
+                    "Classification": "export",
+                    "Properties": {
+                    "PYSPARK_PYTHON": "/usr/bin/python3",
+                    "spark.pyspark.virtualenv.enabled": "true",
+                    "spark.pyspark.virtualenv.type":"native",
+                    "spark.pyspark.virtualenv.bin.path":"/usr/bin/virtualenv"
+                    },
+                }
+            ],
+        }
+    ],
+    "Instances": {
+        "InstanceGroups": [
+            {
+                "Name": "Master node",
+                "Market": "SPOT",
+                "InstanceRole": "MASTER",
+                "InstanceType": "m5.xlarge",
+                "InstanceCount": 1,
+            },
+            {
+                "Name": "Core - 2",
+                "Market": "SPOT", # SPOT  son instancias de "uso según disponibilidad"
+                "InstanceRole": "CORE",
+                "InstanceType": "m5.xlarge",
+                "InstanceCount": 2,
+            },
+        ],
+        "Ec2SubnetId": "subnet-0427e49b255238212",
+        "KeepJobFlowAliveWhenNoSteps": True,
+        "TerminationProtected": False, # Esto nos permite terminar la programacion del cluster
+    },
+    "JobFlowRole": "EMR_EC2_DefaultRole",
+    "ServiceRole": "EMR_DefaultRole",
+}
