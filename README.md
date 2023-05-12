@@ -237,4 +237,80 @@ create_emr_cluster = EmrCreateJobFlowOperator(
 )
 
 ```
+&emsp;
 
+**Envío de trabajos Spark**
+
+El proceso de Spark  contiene el archivo python para el análisis y transformaciones  del dataset (curation_step.py), así como los pasos de movimiento de datos. La configuración `s3-dist-cp` permite transferir datos dentro de S3, o entre HDFS y S3. El archivo python se carga desde el bucket de S3, mientras el dataset se mueve desde el bucket de S3 al HDFS para el data curated y viceversa.Se añadio un sensor que comprobará periódicamente si el último paso se ha completado, omitido o finalizado. Después de que el sensor de pasos identifique la finalización curatio_step (por ejemplo, mover los datos finales de HDFS al bucket S3), se añade un paso final para terminar el clúster. El último paso es necesario ya que AWS opera en un modelo de pago por uso (EMR normalmente se factura por segundo) y dejar recursos innecesarios en ejecución es un desperdicio de todos modos.
+
+```Python
+# code snippet of curation_step.py
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", type=str, help="HDFS input", default="/results")
+    parser.add_argument("--output", type=str, help="HDFS output", default="/output")
+    args = parser.parse_args()
+    spark = SparkSession.builder.appName("curation_step").getOrCreate()
+    curation_step(input_loc=args.input, output_loc=args.output)
+```
+
+**Spark-specific jobs: Ejemplo**
+
+```Python
+SPARK_STEPS = [
+    {
+        "Name": "mover raw_data S3 a HDFS",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "s3-dist-cp",
+                "--src=s3://credit_card_analysis/output/results.parquet",
+                "--dest=/results",
+            ],
+        },
+    },
+    {
+        "Name": "run curation_step",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "spark-submit",
+                "--deploy-mode",
+                "client",
+                "s3://credit_card_analysis/scripts/curation_Step.py",
+            ],
+        },
+    },
+    {
+        "Name": "mover el resultado final de credit_analysis  desde HDFS a S3",
+        "ActionOnFailure": "CANCEL_AND_WAIT",
+        "HadoopJarStep": {
+            "Jar": "command-runner.jar",
+            "Args": [
+                "s3-dist-cp",
+                "--src=/output",
+                "--dest=s3://credit_card_analysis/results/",
+            ],
+        },
+    },  
+]
+# Airflow task
+step_adder = EmrAddStepsOperator(
+    task_id="add_steps",
+    job_flow_id="{{ task_instance.xcom_pull(task_ids='create_emr_cluster', key='return_value') }}",
+    aws_conn_id="aws_zmora",
+    steps=SPARK_STEPS,
+    dag=dag,
+)
+```
+**Módulos clave de Airflow para interactuar con Amazon EMR: EmrCreateJobFlowOperator()`.
+- EmrCreateJobFlowOperator()`: para crear un clúster EMR con las aplicaciones deseadas.
+- EmrAddStepsOperator()`: para definir trabajos 
+- EmrStepSensor()`: para vigilar los pasos
+- EmrTerminateJobFlowOperator()`: para terminar el cluster EMR
+
+## 4. Iniciar Airflow DAG
+
+Cargue el DAG final de Airflow en la ruta correspondiente como se explica en la guía de configuración del entorno MWAA. Vaya a la interfaz de usuario de Airflow e inicie el DAG cambiando el botón a ON  o bine utiliza una fecha en el pasado para activar el DAG inmediatamente. 
