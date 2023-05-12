@@ -24,13 +24,10 @@ AWS proporciona [Amazon Managed Workflows for Apache Airflow (MWAA)](https://aws
 5. Para la clase de entorno, seleccionamos 'pw1.small' ya que se corresponde mejor con nuestra carga de trabajo DAG
 6. Activamos 'Airflow task logs' utilizando la configuración por defecto. Esto permite tener información de registro que es especialmente útil para la depuración.
 7. Crear un 'nuevo rol' o usar uno existente y complete la configuración haciendo clic en 'crear nuevo entorno'.
-
 &emsp;
 ## 1a. Variables y conexiones para el entorno MWAA
-
 MWAA proporciona variables para almacenar y recuperar contenido y configuraciones como  (clave-valor) dentro de Airflow. (JSON file)
 ```JSON
-
 {
     "credit_card_analysis": {
         "bucket_name": "credit_card_analysis",
@@ -47,12 +44,10 @@ MWAA proporciona variables para almacenar y recuperar contenido y configuracione
 ```
 En el repositorio se proporciona un [archivo de variables] de ejemplo : "airflow_variables.json" que contiene todas las variables utilizadas en este proyecto.
 Airflow también permite definir objetos de conexión. En este vaso, necesitamos una conexión con 'AWS' (Airflow actúa como un sistema externo a AWS) y con la 'base de datos' en la que se almacenarán los resultados finales.
-
 &emsp;
 ## 1b. Configuración general en el DAG de Airflow
 Se define la información básica de configuración, como 'schedule_interval' o 'start_date' en la sección 'default_args' y dag del DAG. 
 ```Python
-
 default_args = {
     'start_date': datetime(2021, 3, 8),
     'owner': 'Airflow',
@@ -76,16 +71,13 @@ dag = DAG('credit_card_analysis',
 ```
 &emsp;
 ## 2. Tasks en el Airflow DAG
-
 **Arquitectura básica  
 
  Las tareas de ML se ejecutan a través de [Amazon SageMaker](https://aws.amazon.com/de/sagemaker/), mientras que los análisis de datos complejos pueden realizarse de forma distribuida en [Amazon EMR](https://aws.amazon.com/de/emr/). En este REPO, se ejecuta el análisis de datos en un clúster de Amazon EMR utilizando [Apache Spark](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark.html) (a través de Python API PySpark).
 
 Podemos escribir funciones personalizadas (por ejemplo, solicitar datos) o podemos hacer uso de módulos predefinidos que suelen estar ahí para desencadenar actividades externas (por ejemplo, análisis de datos en Spark en Amazon EMR).
-
 Ejemplo de una función personalizada que luego se asigna a un 'PythonOperator' para funcionar como una tarea:
 ```Python
-
 # custom function
 '''
     1. connectar a la Base de Datos en Postgres 
@@ -124,16 +116,13 @@ Ejemplo de una función personalizada que luego se asigna a un 'PythonOperator' 
     log.info("schema y tabla creados")
 
 # Task
-
 create_schema = PythonOperator(
     task_id='create_schema',
     provide_context=True,
     python_callable=create_schema,
     op_kwargs=default_args,
     dag=dag,
-
 )
-
 
 ```
 
