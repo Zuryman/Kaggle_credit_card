@@ -60,21 +60,17 @@ default_args = {
     'output_key': Variable.get('credit_card_analysis',deserialize_json=True)['output_key'],
     'db_name': Variable.get('credit_card_analysis', deserialize_json=True)['db_name']
 }
-
 dag = DAG('credit_card_analysis',
           description='Extraer un dataset desde kaggle,  simular el kernell via Spark, salvar resultados a PostgreSQ y S3',
           schedule_interval='@daily',
           catchup=False,
           default_args=default_args,
           max_active_runs=1)
-
 ```
 &emsp;
 ## 2. Tasks en el Airflow DAG
 **Arquitectura básica  
-
  Las tareas de ML se ejecutan a través de [Amazon SageMaker](https://aws.amazon.com/de/sagemaker/), mientras que los análisis de datos complejos pueden realizarse de forma distribuida en [Amazon EMR](https://aws.amazon.com/de/emr/). En este REPO, se ejecuta el análisis de datos en un clúster de Amazon EMR utilizando [Apache Spark](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark.html) (a través de Python API PySpark).
-
 Podemos escribir funciones personalizadas (por ejemplo, solicitar datos) o podemos hacer uso de módulos predefinidos que suelen estar ahí para desencadenar actividades externas (por ejemplo, análisis de datos en Spark en Amazon EMR).
 Ejemplo de una función personalizada que luego se asigna a un 'PythonOperator' para funcionar como una tarea:
 ```Python
@@ -123,6 +119,33 @@ create_schema = PythonOperator(
     op_kwargs=default_args,
     dag=dag,
 )
-
 ```
-
+&emsp;
+## 3. Ejecutar Spark en Amazon EMR
+**Permisos  
+Cambia IAM_policy_configuration.json) a la siguiente configuración para permitir que MWAA interactúe con Amazon EMR. 
+```JSON
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "elasticmapreduce:DescribeStep",
+                "elasticmapreduce:AddJobFlowSteps",
+                "elasticmapreduce:RunJobFlow"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": [
+                "arn:aws:iam::{{AWS ID}}:role/EMR_DefaultRole",
+                "arn:aws:iam::{{AWS ID}}:role/EMR_EC2_DefaultRole"
+            ]
+        }
+    ]
+}
+```
+&emsp;
