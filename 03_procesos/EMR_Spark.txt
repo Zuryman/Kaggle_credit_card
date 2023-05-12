@@ -1,0 +1,14 @@
+Crear EMR cluster con Spark y Hadoop
+    Resources: detalles de configuracion en Airflow
+Bootstrap para instalar librerias de Python
+    Resources: Install_libraries.sh
+Mover datos desde S3 a HDFS
+    Resources : Configuracion de spark job en airflow DAG
+Run analysis
+    Resources: kernel.py,  configuracion de spark job en DAG 
+Mover Resultados de analysis desde HDFS a S3
+    Resources : configuracion en el DAG
+Revisar pasos
+    Resources:  configuracion en el DAG
+Terminar EMR Cluster
+    Resources: configuracion en el DAG    

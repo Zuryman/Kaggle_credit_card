@@ -1,0 +1,16 @@
+Crear eschemas y tablas en PostGreSQL
+    PythonOperator: Create schema
+Importar Kaggle Data
+    PythonOperator: get_Data
+Crear EMR Cluster e iniciar Spark y Hadoop
+    PythonOperator: Create_EMR_cluster  
+Agregar pasos a EMR Cluster
+    PythonOperator: Step_adder
+Agregar step checker al  EMR Cluster
+    PythonOperator:Step_checker
+Terminar EMR Cluster
+    PythonOperator:Terminate_EMR_cluster
+Salvar resultados a PostGreSQL
+    PythonOperator: Save_PostGres_db
+Salvar resultados en AWS
+    PythonOperator: Save_Bucket_S3
