@@ -175,8 +175,7 @@ Cada paso que se dará en el clúste, sera ejecutado por el DAG Airflow:
      sudo pip3 xhboost
 ```
 Airflow ofrece módulos predefinidos para interactuar rápidamente con Amazon EMR. El siguiente ejemplo muestra cómo se crea un clúster de Amazon EMR con Spark (PySpark) y una aplicación Hadoop mediante 'EmrCreateJobFlowOperator()'.
-
-
+```JSON
 JOB_FLOW_OVERRIDES = {
     "Name": "credit_card_analysis",
     "ReleaseLabel": "emr-5.33.0",
