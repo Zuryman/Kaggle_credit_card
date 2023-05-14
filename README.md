@@ -2,8 +2,8 @@
 Repositorio para proyecto de tarjetas de credito
 # ------------------------------------------------------------------------------
 Pipeline creado con Apache Spark (PySpark) y Apache Airflow en ambiente de Amazon (AWS)
-Este REPO muestra el desarrollo de un Pipeline escalable en AWS, utilizando tecnicas de procesos paralelos en Apache spark
-Consiste en un analisis simple utilizando Pandas y Pylot y Spark para el training.
+Este REPO muestra el desarrollo de un Pipeline escalable en AWS, utilizando tecnicas de procesamiento paralelo en Apache spark, ademas se realiza
+un analisis simple utilizando Pandas y Pylot y Spark para el training.
 
 El código esta basado en python el analisis es un kernell compuesto de  datos de tarjetas de credito, este conjunto de datos se descarga de kaggle
 
@@ -72,7 +72,7 @@ dag = DAG('credit_card_analysis',
 
 **Arquitectura básica**  
 
- Las tareas de ML se ejecutan a través de [Amazon SageMaker](https://aws.amazon.com/de/sagemaker/), mientras que los análisis de datos complejos pueden realizarse de forma distribuida en [Amazon EMR](https://aws.amazon.com/de/emr/). En este REPO, se ejecuta el análisis de datos en un clúster de Amazon EMR utilizando [Apache Spark](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark.html) (a través de Python API PySpark).
+ Las tareas de ML se ejecutan a través de [Amazon SageMaker](https://aws.amazon.com/de/sagemaker/), mientras que los análisis de datos complejos pueden realizarse de forma distribuida en [Amazon EMR](https://aws.amazon.com/de/emr/). En este REPO, se ejecuta el procesamiento y training de datos en un clúster de Amazon EMR utilizando [Apache Spark](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark.html) (a través de Python API PySpark).
 Podemos escribir funciones personalizadas (por ejemplo, solicitar datos) o podemos hacer uso de módulos predefinidos que suelen estar ahí para desencadenar actividades externas (por ejemplo, análisis de datos en Spark en Amazon EMR).
 Ejemplo de una función personalizada que luego se asigna a un 'PythonOperator' para funcionar como una tarea:
 ```Python
@@ -152,7 +152,7 @@ Cambia IAM_policy_configuration.json) a la siguiente configuración para permiti
 }
 ```
 &emsp;
-**Motivación para utilizar Spark para el análisis de datos**
+**Motivación para utilizar Spark**
 
 La API de Spark, es fácil de usar para los desarrolladores, reduce gran parte del trabajo pesado de la computación distribuida y se puede acceder a ella en varios lenguajes. En este caso [PySpark](https://pypi.org/project/pyspark/), que es una API de Python para interactuar con Spark a alto nivel. Esto significa que es adecuado para interactuar con un clúster existente, pero no contiene herramientas para configurar un nuevo clúster independiente.  
 La lógica de paralelización de una arquitectura distribuida es el principal motor para acelerar el procesamiento y, por tanto, permitir la escalabilidad. El uso de DataFrame o Resilient Distributed Dataset (RDD) de Spark permite distribuir el cálculo de datos en un clúster.
